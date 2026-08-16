@@ -30,9 +30,9 @@
 - 🔐 **Unified Single Sign-On (SSO)**: Role-specific portals for Students, College Nodal Verification Officers, and Central Ministry Directors.
 - 🗄️ **Mandatory Supabase Database Storage**: Real-time PostgreSQL database persistence for application documents, scrutiny notes, and audit logs.
 - 📜 **Cryptographic Blockchain Ledger**: Hardhat / Ethers.js v6 smart contract tracking student verifications, fund allocations, and DBT disbursements.
-- 💳 **PFMS & NPCI APBS Integration**: Simulated Direct Benefit Transfer cleared via Reserve Bank of India (RBI) Aadhaar Payment Bridge.
+- 💳 **PFMS & NPCI APBS Integration**: Simulated Direct Benefit Transfer. 
 - 🔎 **Public "Glass-Pipe" Explorer**: Open verification portal allowing public audit of fund movements by Student ID without compromising personal PII data.
-- 📑 **DigiLocker Certified Vault**: Automated verification of academic marksheets and income certificates.
+- 📑 **Certified Vault**: Automated verification of academic marksheets and income certificates.
 
 ---
 
