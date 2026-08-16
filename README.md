@@ -7,6 +7,7 @@
 [![Next.js](https://img.shields.io/badge/Next.js-14.2-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![Solidity](https://img.shields.io/badge/Solidity-0.8.20-363636?style=for-the-badge&logo=solidity)](https://soliditylang.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-Database-3FCF8E?style=for-the-badge&logo=supabase)](https://supabase.com)
+[![Implementation](https://img.shields.io/badge/Architecture-IMPLEMENTATION.md-7000FF?style=for-the-badge&logo=markdown)](IMPLEMENTATION.md)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
 
 *A unified, transparent, and tamper-evident national scholarship management and direct benefit transfer platform connecting Students, Educational Institutions, and Central Ministries.*
@@ -14,6 +15,10 @@
 ---
 
 </div>
+
+> 📘 **Looking for full system implementation specs?** Read the detailed **[IMPLEMENTATION.md](IMPLEMENTATION.md)** architecture document.
+
+---
 
 ## 📌 Executive Summary
 
@@ -78,8 +83,8 @@ The application includes **7 pre-seeded authorized accounts** ready for testing 
 ### 1. Clone & Install Dependencies
 
 ```bash
-git clone https://github.com/your-org/scholarship-portal.git
-cd scholarship-portal
+git clone https://github.com/sujay-237/ScholarParchment.git
+cd ScholarParchment
 npm install
 ```
 
@@ -92,11 +97,11 @@ Create a `.env.local` file at the root of the project:
 ```env
 # Blockchain RPC & Smart Contract Address
 NEXT_PUBLIC_RPC_URL=http://127.0.0.1:8545
-CONTRACT_ADDRESS=0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
+CONTRACT_ADDRESS=0x0000000000000000000000000000000000000000
 
-# Hardhat Role Private Keys (Accounts #0 and #1)
-MINISTRY_PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-COLLEGE_PRIVATE_KEY=0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
+# Hardhat Role Private Keys
+MINISTRY_PRIVATE_KEY=0xYOUR_MINISTRY_ADMIN_PRIVATE_KEY_HERE
+COLLEGE_PRIVATE_KEY=0xYOUR_COLLEGE_VERIFIER_PRIVATE_KEY_HERE
 
 # Supabase Credentials (Required)
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
@@ -175,9 +180,9 @@ Open [http://localhost:3000](http://localhost:3000) in your browser. Sign in via
 
 ## 📄 Documentation Files
 
-- 📘 [IMPLEMENTATION.md](IMPLEMENTATION.md) — Detailed technical implementation architecture, schema designs, and smart contract specs.
-- ⚙️ [ENV_SETUP.md](ENV_SETUP.md) — Environment configuration guide.
-- 📜 [LICENSE](LICENSE) — Official MIT License terms.
+- 📘 **[IMPLEMENTATION.md](IMPLEMENTATION.md)** — Detailed technical implementation architecture, schema designs, and smart contract specs.
+- ⚙️ **[ENV_SETUP.md](ENV_SETUP.md)** — Environment configuration guide.
+- 📜 **[LICENSE](LICENSE)** — Official MIT License terms.
 
 ---
 
