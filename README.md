@@ -3,7 +3,6 @@
 # 🎓 ScholarParchment
 ### *National Gateway for Transparent Scholarship Management & Direct Benefit Transfer (DBT)*
 
-[![SIH 2026](https://img.shields.io/badge/SIH-2026%20Winner%20Architecture-orange.svg?style=for-the-badge)](https://sih.gov.in)
 [![Next.js](https://img.shields.io/badge/Next.js-14.2-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![Solidity](https://img.shields.io/badge/Solidity-0.8.20-363636?style=for-the-badge&logo=solidity)](https://soliditylang.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-Database-3FCF8E?style=for-the-badge&logo=supabase)](https://supabase.com)
