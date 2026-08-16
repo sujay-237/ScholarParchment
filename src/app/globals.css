@@ -1,0 +1,84 @@
+@import url('https://fonts.googleapis.com/css2?family=Anybody:ital,wght@0,300..900;1,300..900&family=Inter:wght@300;400;500;600;700;800&family=Work+Sans:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-anybody: 'Anybody', cursive, sans-serif;
+  --font-work-sans: 'Work Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+  background-color: #fdf9f5;
+  color: #1c1c19;
+  font-family: var(--font-anybody), sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6, .font-headline {
+  font-family: var(--font-inter), sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.font-label {
+  font-family: var(--font-work-sans), sans-serif;
+}
+
+/* Custom Scrollbar styled for Parchment Theme */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1ede9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cac7b8;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #7a776a;
+}
+
+/* Glassmorphism & Elevation utilities */
+.parchment-glass {
+  background: rgba(253, 249, 245, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.parchment-border {
+  border: 1px solid #e6e2de;
+}
+
+.parchment-card {
+  background-color: #ffffff;
+  border: 1px solid #ebe7e4;
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px -2px rgba(121, 119, 116, 0.06);
+  transition: all 0.2s ease-in-out;
+}
+
+.parchment-card:hover {
+  border-color: #cac7b8;
+  box-shadow: 0 10px 25px -4px rgba(99, 96, 52, 0.09);
+}
+
+/* Subtle glow accent */
+.glow-subtle {
+  box-shadow: 0 0 15px rgba(99, 96, 52, 0.15);
+}
+
+/* Print Styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
