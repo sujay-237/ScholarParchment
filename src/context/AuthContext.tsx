@@ -96,8 +96,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User>(PRESEEDED_USERS[0]);
-  const [activeRole, setActiveRole] = useState<UserRole>('student');
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
+  const [activeRole, setActiveRole] = useState<UserRole>('guest');
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [allUsers, setAllUsers] = useState<User[]>(PRESEEDED_USERS);
 
   // Initialize session from localStorage or Supabase
@@ -109,9 +109,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setCurrentUser(savedUser);
         setActiveRole(savedUser.role);
         setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+        setActiveRole('guest');
       }
     } catch {
-      // fallback default
+      setIsAuthenticated(false);
+      setActiveRole('guest');
     }
 
     // Attempt to sync user accounts from Supabase database
@@ -165,6 +169,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     setIsAuthenticated(false);
+    setActiveRole('guest');
     try {
       localStorage.removeItem('sp_auth_user');
     } catch (e) {

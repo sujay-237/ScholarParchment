@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { AuditRecord } from '@/types';
+import { useAuth } from '@/context/AuthContext';
 import { X, ShieldCheck, CheckCircle2, Copy, Clock, Cpu, Lock } from 'lucide-react';
 import { formatDateTime } from '@/lib/utils';
 
@@ -16,12 +17,32 @@ export const AuditRecordModal: React.FC<AuditRecordModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const { isAuthenticated } = useAuth();
+
   if (!isOpen || !record) return null;
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     alert('Copied cryptographic hash to clipboard!');
   };
+
+  const maskName = (name: string) => {
+    if (!name) return 'Beneficiary';
+    const parts = name.split(' ');
+    if (parts.length === 1) return parts[0][0] + '***';
+    return `${parts[0]} ${parts[1][0]}.***`;
+  };
+
+  const maskId = (id: string) => {
+    if (!id) return '****';
+    if (id.length <= 4) return '****';
+    return `****-${id.slice(-4)}`;
+  };
+
+  const studentDisplayName = isAuthenticated ? record.studentName : maskName(record.studentName);
+  const actorDisplayName = isAuthenticated ? record.actorName : maskName(record.actorName);
+  const actorDisplayId = isAuthenticated ? record.actorId : maskId(record.actorId);
+  const displayIp = isAuthenticated ? record.ipAddress : `${record.ipAddress.slice(0, 5)}***.***`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
@@ -56,6 +77,16 @@ export const AuditRecordModal: React.FC<AuditRecordModalProps> = ({
 
         {/* Content Body */}
         <div className="p-6 space-y-5 text-xs">
+          {/* Privacy Banner if guest */}
+          {!isAuthenticated && (
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2 text-amber-900 text-xs">
+              <Lock className="w-4 h-4 text-amber-700 shrink-0" />
+              <span>
+                <strong>Privacy Protected:</strong> Beneficiary & officer details are masked for guest visitors. Sign in to view full unmasked credentials.
+              </span>
+            </div>
+          )}
+
           {/* Top Banner */}
           <div className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/60 space-y-2">
             <div className="flex items-center justify-between">
@@ -71,13 +102,13 @@ export const AuditRecordModal: React.FC<AuditRecordModalProps> = ({
           <div className="grid grid-cols-2 gap-3">
             <div className="p-3 bg-surface-container-lowest border border-surface-container rounded-xl">
               <span className="text-secondary text-[11px]">Associated Applicant</span>
-              <p className="font-semibold text-on-surface mt-0.5">{record.studentName}</p>
+              <p className="font-semibold text-on-surface mt-0.5">{studentDisplayName}</p>
               <p className="text-[10px] text-secondary font-mono">{record.applicationNumber}</p>
             </div>
             <div className="p-3 bg-surface-container-lowest border border-surface-container rounded-xl">
               <span className="text-secondary text-[11px]">Executing Actor / Officer</span>
-              <p className="font-semibold text-on-surface mt-0.5">{record.actorName}</p>
-              <p className="text-[10px] text-secondary uppercase font-label">{record.actorRole} • ID: {record.actorId}</p>
+              <p className="font-semibold text-on-surface mt-0.5">{actorDisplayName}</p>
+              <p className="text-[10px] text-secondary uppercase font-label">{record.actorRole} • ID: {actorDisplayId}</p>
             </div>
             <div className="p-3 bg-surface-container-lowest border border-surface-container rounded-xl">
               <span className="text-secondary text-[11px]">State Transition</span>
@@ -91,7 +122,7 @@ export const AuditRecordModal: React.FC<AuditRecordModalProps> = ({
             </div>
             <div className="p-3 bg-surface-container-lowest border border-surface-container rounded-xl">
               <span className="text-secondary text-[11px]">Gateway & Origin IP</span>
-              <p className="font-mono text-on-surface mt-0.5">{record.ipAddress}</p>
+              <p className="font-mono text-on-surface mt-0.5">{displayIp}</p>
             </div>
           </div>
 

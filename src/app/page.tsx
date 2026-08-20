@@ -26,14 +26,29 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 
 export default function WelcomePage() {
-  const { setRole } = useAuth();
+  const { setRole, isAuthenticated, activeRole } = useAuth();
   const router = useRouter();
 
   const handleRoleSelect = (role: UserRole) => {
+    if (!isAuthenticated) {
+      router.push('/auth');
+      return;
+    }
     setRole(role);
     if (role === 'student') router.push('/student/dashboard');
     else if (role === 'college') router.push('/college/dashboard');
     else if (role === 'ministry') router.push('/ministry/dashboard');
+  };
+
+  const handleExploreClick = () => {
+    if (!isAuthenticated) {
+      router.push('/auth');
+      return;
+    }
+    if (activeRole === 'student') router.push('/student/explorer');
+    else if (activeRole === 'college') router.push('/college/dashboard');
+    else if (activeRole === 'ministry') router.push('/ministry/dashboard');
+    else router.push('/student/explorer');
   };
 
   return (
@@ -51,7 +66,7 @@ export default function WelcomePage() {
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-headline tracking-tight text-on-surface leading-[1.1]">
               Transparent Scholarships, <br />
-              <span className="text-primary underline decoration-primary/40 decoration-wavy decoration-2">
+              <span className="text-primary">
                 Verified Futures.
               </span>
             </h1>
@@ -62,7 +77,7 @@ export default function WelcomePage() {
 
             <div className="flex flex-wrap items-center gap-4 pt-2">
               <button
-                onClick={() => handleRoleSelect('student')}
+                onClick={handleExploreClick}
                 className="px-6 py-3.5 rounded-xl bg-primary hover:bg-primary/90 text-white font-medium text-sm flex items-center gap-2 shadow-md hover:shadow-lg transition-all"
               >
                 <GraduationCap className="w-4 h-4" />

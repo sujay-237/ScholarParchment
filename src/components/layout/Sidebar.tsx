@@ -23,6 +23,8 @@ import {
   FileSpreadsheet,
   FileSignature,
   FileCheck2,
+  Lock,
+  ArrowRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -41,7 +43,7 @@ interface NavItem {
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const pathname = usePathname();
-  const { activeRole, currentUser } = useAuth();
+  const { activeRole, currentUser, isAuthenticated } = useAuth();
   const { applications, batches } = useScholarshipData();
   const { unreadCount } = useNotifications();
 
@@ -57,6 +59,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const activeBatchesCount = batches.filter(
     (b) => b.status === 'pending_approval' || b.status === 'processing'
   ).length;
+
+  // Public Gateway Links (for guest / unauthenticated visitors)
+  const publicLinks: NavItem[] = [
+    {
+      title: 'Scholarship Explorer',
+      href: '/student/explorer',
+      icon: Compass,
+      badge: 'Live Schemes',
+    },
+    {
+      title: 'Verification Records',
+      href: '/records',
+      icon: ShieldCheck,
+    },
+    {
+      title: 'Help & Support',
+      href: '/help',
+      icon: HelpCircle,
+    },
+  ];
 
   // Student Navigation Links
   const studentLinks: NavItem[] = [
@@ -151,13 +173,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   ];
 
   const getPrimaryLinks = () => {
+    if (!isAuthenticated) {
+      return publicLinks;
+    }
     switch (activeRole) {
       case 'college':
         return collegeLinks;
       case 'ministry':
         return ministryLinks;
-      default:
+      case 'student':
         return studentLinks;
+      default:
+        return publicLinks;
     }
   };
 
@@ -184,22 +211,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <div className="p-3.5 rounded-2xl bg-surface-container-low border border-outline-variant/60">
             <div className="flex items-center justify-between text-xs">
               <span className="font-semibold text-secondary uppercase font-label text-[10px]">
-                Active Persona
+                {isAuthenticated ? 'Active Persona' : 'Public Access'}
               </span>
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+              <span className={`w-2 h-2 rounded-full ${isAuthenticated ? 'bg-emerald-500 animate-ping' : 'bg-amber-500'}`} />
             </div>
             <p className="font-bold text-sm font-headline text-on-surface mt-1 truncate">
-              {currentUser.name}
+              {isAuthenticated ? currentUser.name : 'Guest Visitor'}
             </p>
             <p className="text-xs text-secondary capitalize font-label">
-              {currentUser.designation || currentUser.institution || `${activeRole} Portal`}
+              {isAuthenticated
+                ? currentUser.designation || currentUser.institution || `${activeRole} Portal`
+                : 'Sign in to access portals'}
             </p>
           </div>
 
           {/* Primary Navigation Section */}
           <div>
             <div className="text-[11px] font-bold text-secondary uppercase tracking-wider font-label px-3 mb-2">
-              {activeRole === 'student'
+              {!isAuthenticated
+                ? 'Public Gateway'
+                : activeRole === 'student'
                 ? 'Student Workspace'
                 : activeRole === 'college'
                 ? 'Institutional Verification'
@@ -248,47 +279,66 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             </nav>
           </div>
 
-          {/* Shared Platform Services Section */}
-          <div>
-            <div className="text-[11px] font-bold text-secondary uppercase tracking-wider font-label px-3 mb-2">
-              Shared Platform Services
-            </div>
-            <nav className="space-y-1">
-              {sharedLinks.map((item) => {
-                const Icon = item.icon;
-                const isActive = pathname === item.href;
+          {/* Shared Platform Services Section / Guest Callout */}
+          {isAuthenticated ? (
+            <div>
+              <div className="text-[11px] font-bold text-secondary uppercase tracking-wider font-label px-3 mb-2">
+                Shared Platform Services
+              </div>
+              <nav className="space-y-1">
+                {sharedLinks.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = pathname === item.href;
 
-                return (
-                  <NextLink
-                    key={item.href}
-                    href={item.href}
-                    onClick={onClose}
-                    className={cn(
-                      'flex items-center justify-between px-3.5 py-2 rounded-xl text-xs font-medium transition-colors group',
-                      isActive
-                        ? 'bg-primary/10 text-primary font-semibold'
-                        : 'text-secondary hover:bg-surface-container hover:text-on-surface'
-                    )}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <Icon className="w-4 h-4 text-secondary group-hover:text-primary" />
-                      <span>{item.title}</span>
-                    </div>
-                    {item.badge && (
-                      <span
-                        className={cn(
-                          'text-[10px] font-bold px-2 py-0.5 rounded-full',
-                          item.badgeColor || 'bg-surface-container text-secondary'
-                        )}
-                      >
-                        {item.badge}
-                      </span>
-                    )}
-                  </NextLink>
-                );
-              })}
-            </nav>
-          </div>
+                  return (
+                    <NextLink
+                      key={item.href}
+                      href={item.href}
+                      onClick={onClose}
+                      className={cn(
+                        'flex items-center justify-between px-3.5 py-2 rounded-xl text-xs font-medium transition-colors group',
+                        isActive
+                          ? 'bg-primary/10 text-primary font-semibold'
+                          : 'text-secondary hover:bg-surface-container hover:text-on-surface'
+                      )}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Icon className="w-4 h-4 text-secondary group-hover:text-primary" />
+                        <span>{item.title}</span>
+                      </div>
+                      {item.badge && (
+                        <span
+                          className={cn(
+                            'text-[10px] font-bold px-2 py-0.5 rounded-full border',
+                            item.badgeColor || 'bg-surface-container text-secondary border-outline-variant/40'
+                          )}
+                        >
+                          {item.badge}
+                        </span>
+                      )}
+                    </NextLink>
+                  );
+                })}
+              </nav>
+            </div>
+          ) : (
+            <div className="p-4 rounded-2xl bg-primary-container/20 border border-primary/20 space-y-3 mt-4">
+              <div className="flex items-center gap-2 text-primary font-bold text-xs font-headline">
+                <Lock className="w-4 h-4" />
+                <span>Portal Workspaces</span>
+              </div>
+              <p className="text-xs text-secondary leading-relaxed">
+                Sign in to access Student, College Nodal Officer, or Ministry Sanction Workspaces.
+              </p>
+              <NextLink
+                href="/auth"
+                className="flex w-full py-2.5 items-center justify-center gap-2 rounded-xl bg-primary text-white font-medium text-xs shadow-sm hover:bg-primary/90 transition-colors"
+              >
+                <span>Sign In / Access Portal</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </NextLink>
+            </div>
+          )}
         </div>
 
         {/* Sidebar Footer Security Seal */}

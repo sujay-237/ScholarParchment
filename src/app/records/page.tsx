@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
+import NextLink from 'next/link';
+import { useAuth } from '@/context/AuthContext';
 import { useScholarshipData } from '@/context/ScholarshipDataContext';
 import { AppShell } from '@/components/layout/AppShell';
 import { AuditRecordModal } from '@/components/common/AuditRecordModal';
@@ -17,11 +19,13 @@ import {
   Cpu,
   Layers,
   Database,
+  ShieldAlert,
 } from 'lucide-react';
 import { formatDateTime } from '@/lib/utils';
 
 export default function TransactionRecordsPage() {
   const { auditRecords } = useScholarshipData();
+  const { isAuthenticated } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<string>('ALL');
   const [selectedRecord, setSelectedRecord] = useState<AuditRecord | null>(null);
@@ -29,6 +33,19 @@ export default function TransactionRecordsPage() {
   const copyText = (text: string) => {
     navigator.clipboard.writeText(text);
     alert('Copied to clipboard!');
+  };
+
+  const maskName = (name: string) => {
+    if (!name) return 'Beneficiary';
+    const parts = name.split(' ');
+    if (parts.length === 1) return parts[0][0] + '***';
+    return `${parts[0]} ${parts[1][0]}.***`;
+  };
+
+  const maskId = (id: string) => {
+    if (!id) return '****';
+    if (id.length <= 4) return '****';
+    return `****-${id.slice(-4)}`;
   };
 
   const filteredRecords = auditRecords.filter((r) => {
@@ -71,6 +88,31 @@ export default function TransactionRecordsPage() {
           </div>
         </div>
 
+        {/* Guest PII Privacy Notice */}
+        {!isAuthenticated && (
+          <div className="p-4 bg-amber-50/90 border border-amber-200/90 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-amber-900 shadow-sm">
+            <div className="flex items-center gap-2.5">
+              <div className="p-1.5 rounded-lg bg-amber-100 text-amber-800 shrink-0">
+                <Lock className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="font-bold text-amber-950 font-headline">
+                  Beneficiary PII Data Privacy Active
+                </p>
+                <p className="text-[11px] text-amber-800 mt-0.5">
+                  Student names and authority IDs are masked for guest visitors. Sign in to inspect complete unmasked cryptographic records.
+                </p>
+              </div>
+            </div>
+            <NextLink
+              href="/auth"
+              className="px-4 py-2 bg-primary text-white rounded-xl font-semibold text-xs hover:bg-primary/90 transition-all shadow-sm shrink-0"
+            >
+              Sign In for Unmasked Access
+            </NextLink>
+          </div>
+        )}
+
         {/* Search & Filter Bar */}
         <div className="bg-surface-container-lowest p-4 sm:p-5 rounded-2xl border border-outline-variant/60 space-y-4">
           <div className="relative">
@@ -109,84 +151,98 @@ export default function TransactionRecordsPage() {
 
         {/* Ledger Entries List */}
         <div className="space-y-4">
-          {filteredRecords.map((record) => (
-            <div
-              key={record.id}
-              onClick={() => setSelectedRecord(record)}
-              className="p-6 bg-surface-container-lowest rounded-3xl border border-outline-variant/80 shadow-sm hover:border-primary/60 cursor-pointer transition-all space-y-4"
-            >
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-surface-container">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-primary-container text-on-primary-container">
-                    <ShieldCheck className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-xs uppercase font-label bg-surface-container px-2 py-0.5 rounded text-on-surface">
-                        {record.recordType.replace('_', ' ')}
-                      </span>
-                      <span className="text-xs font-mono text-secondary">
-                        Block #{record.blockHeight}
-                      </span>
+          {filteredRecords.map((record) => {
+            const studentDisplayName = isAuthenticated ? record.studentName : maskName(record.studentName);
+            const actorDisplayName = isAuthenticated ? record.actorName : maskName(record.actorName);
+            const actorDisplayId = isAuthenticated ? record.actorId : maskId(record.actorId);
+            const displayIp = isAuthenticated ? record.ipAddress : `${record.ipAddress.slice(0, 5)}***.***`;
+
+            return (
+              <div
+                key={record.id}
+                onClick={() => setSelectedRecord(record)}
+                className="p-6 bg-surface-container-lowest rounded-3xl border border-outline-variant/80 shadow-sm hover:border-primary/60 cursor-pointer transition-all space-y-4"
+              >
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-surface-container">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-xl bg-primary-container text-on-primary-container">
+                      <ShieldCheck className="w-5 h-5 text-primary" />
                     </div>
-                    <h3 className="font-bold text-sm sm:text-base font-headline text-on-surface mt-1">
-                      {record.actionDetails}
-                    </h3>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-xs uppercase font-label bg-surface-container px-2 py-0.5 rounded text-on-surface">
+                          {record.recordType.replace('_', ' ')}
+                        </span>
+                        <span className="text-xs font-mono text-secondary">
+                          Block #{record.blockHeight}
+                        </span>
+                      </div>
+                      <h3 className="font-bold text-sm sm:text-base font-headline text-on-surface mt-1">
+                        {record.actionDetails}
+                      </h3>
+                    </div>
+                  </div>
+
+                  <div className="text-right whitespace-nowrap">
+                    <span className="text-xs font-mono text-secondary">
+                      {formatDateTime(record.timestamp)}
+                    </span>
+                    <div className="flex items-center justify-end gap-1 text-[11px] text-emerald-800 font-bold mt-0.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Integrity Verified</span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="text-right whitespace-nowrap">
-                  <span className="text-xs font-mono text-secondary">
-                    {formatDateTime(record.timestamp)}
-                  </span>
-                  <div className="flex items-center justify-end gap-1 text-[11px] text-emerald-800 font-bold mt-0.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Integrity Verified</span>
+                {/* Attributes Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                  <div className="p-3 bg-surface-container-low rounded-xl border border-outline-variant/40">
+                    <span className="text-secondary text-[10px] font-label uppercase">Applicant & Scheme</span>
+                    <p className="font-semibold text-on-surface mt-0.5 flex items-center justify-between">
+                      <span>{studentDisplayName}</span>
+                      {!isAuthenticated && (
+                        <span className="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-label font-bold">
+                          PII Masked
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-[10px] text-secondary font-mono truncate">{record.applicationNumber}</p>
+                  </div>
+
+                  <div className="p-3 bg-surface-container-low rounded-xl border border-outline-variant/40">
+                    <span className="text-secondary text-[10px] font-label uppercase">Signing Authority</span>
+                    <p className="font-semibold text-on-surface mt-0.5">{actorDisplayName}</p>
+                    <p className="text-[10px] text-secondary uppercase font-label">{record.actorRole} • ID: {actorDisplayId}</p>
+                  </div>
+
+                  <div className="p-3 bg-surface-container-low rounded-xl border border-outline-variant/40">
+                    <span className="text-secondary text-[10px] font-label uppercase">Origin Gateway IP</span>
+                    <p className="font-mono text-on-surface mt-0.5 text-xs truncate">{displayIp}</p>
+                    <p className="text-[10px] text-emerald-700 font-medium">SSL / TLS 1.3 Certified</p>
                   </div>
                 </div>
-              </div>
 
-              {/* Attributes Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                <div className="p-3 bg-surface-container-low rounded-xl border border-outline-variant/40">
-                  <span className="text-secondary text-[10px] font-label uppercase">Applicant & Scheme</span>
-                  <p className="font-semibold text-on-surface mt-0.5">{record.studentName}</p>
-                  <p className="text-[10px] text-secondary font-mono truncate">{record.applicationNumber}</p>
-                </div>
+                {/* Cryptographic SHA-256 Hash Display */}
+                <div className="p-3 bg-surface-container-low rounded-xl border border-outline-variant/50 flex items-center justify-between font-mono text-[11px]">
+                  <div className="flex items-center gap-2 truncate pr-2">
+                    <Lock className="w-3.5 h-3.5 text-primary shrink-0" />
+                    <span className="text-secondary shrink-0">SHA-256:</span>
+                    <span className="text-primary font-semibold truncate select-all">{record.blockHash}</span>
+                  </div>
 
-                <div className="p-3 bg-surface-container-low rounded-xl border border-outline-variant/40">
-                  <span className="text-secondary text-[10px] font-label uppercase">Signing Authority</span>
-                  <p className="font-semibold text-on-surface mt-0.5">{record.actorName}</p>
-                  <p className="text-[10px] text-secondary uppercase font-label">{record.actorRole} • ID: {record.actorId}</p>
-                </div>
-
-                <div className="p-3 bg-surface-container-low rounded-xl border border-outline-variant/40">
-                  <span className="text-secondary text-[10px] font-label uppercase">Origin Gateway IP</span>
-                  <p className="font-mono text-on-surface mt-0.5 text-xs truncate">{record.ipAddress}</p>
-                  <p className="text-[10px] text-emerald-700 font-medium">SSL / TLS 1.3 Certified</p>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      copyText(record.blockHash);
+                    }}
+                    className="px-2.5 py-1 bg-surface-container hover:bg-surface-container-high rounded text-secondary hover:text-on-surface text-[10px] font-sans font-semibold shrink-0"
+                  >
+                    Copy Hash
+                  </button>
                 </div>
               </div>
-
-              {/* Cryptographic SHA-256 Hash Display */}
-              <div className="p-3 bg-surface-container-low rounded-xl border border-outline-variant/50 flex items-center justify-between font-mono text-[11px]">
-                <div className="flex items-center gap-2 truncate pr-2">
-                  <Lock className="w-3.5 h-3.5 text-primary shrink-0" />
-                  <span className="text-secondary shrink-0">SHA-256:</span>
-                  <span className="text-primary font-semibold truncate select-all">{record.blockHash}</span>
-                </div>
-
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    copyText(record.blockHash);
-                  }}
-                  className="px-2.5 py-1 bg-surface-container hover:bg-surface-container-high rounded text-secondary hover:text-on-surface text-[10px] font-sans font-semibold shrink-0"
-                >
-                  Copy Hash
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 

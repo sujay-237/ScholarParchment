@@ -29,6 +29,9 @@ export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({
 
   if (!isOpen || !document) return null;
 
+  const status = document.verifiedStatus || 'pending';
+  const docId = (document.id || 'doc-0').toUpperCase();
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-surface-container-lowest rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col border border-outline-variant shadow-2xl overflow-hidden">
@@ -39,9 +42,9 @@ export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({
               <FileText className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-semibold text-on-surface font-headline">{document.name}</h3>
+              <h3 className="font-semibold text-on-surface font-headline">{document.name || 'Untitled Document'}</h3>
               <p className="text-xs text-secondary">
-                {document.category} • Uploaded on {formatDate(document.uploadDate)} • {document.size}
+                {document.category || 'Document'} • Uploaded on {formatDate(document.uploadDate || new Date().toISOString())} • {document.size || '1.0 MB'}
               </p>
             </div>
           </div>
@@ -110,7 +113,7 @@ export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({
                         DIGILOCKER VERIFIED DOCUMENT
                       </div>
                       <p className="text-[10px] text-secondary font-mono mt-0.5">
-                        URI: in.gov.digilocker.cert:{document.id.toUpperCase()}
+                        URI: in.gov.digilocker.cert:{docId}
                       </p>
                     </div>
                     <div className="text-right">
@@ -122,7 +125,7 @@ export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({
 
                   <div className="mt-6 text-center">
                     <h4 className="font-bold text-lg text-on-surface font-headline uppercase tracking-wide">
-                      {document.category}
+                      {document.category || 'CERTIFICATE'}
                     </h4>
                     <p className="text-xs text-secondary mt-1">Official Electronic Record Archive</p>
                   </div>
@@ -173,14 +176,16 @@ export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({
                   <span className="text-xs text-secondary font-medium">Status</span>
                   <span
                     className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                      document.verifiedStatus === 'verified'
+                      status === 'verified'
                         ? 'bg-emerald-100 text-emerald-800'
-                        : document.verifiedStatus === 'flagged'
+                        : status === 'flagged'
                         ? 'bg-amber-100 text-amber-800'
+                        : status === 'rejected'
+                        ? 'bg-rose-100 text-rose-800'
                         : 'bg-surface-container text-on-surface'
                     }`}
                   >
-                    {document.verifiedStatus.toUpperCase()}
+                    {status.toUpperCase()}
                   </span>
                 </div>
                 <div className="text-xs text-on-surface-variant">
